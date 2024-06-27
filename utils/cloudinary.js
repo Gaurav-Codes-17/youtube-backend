@@ -1,33 +1,36 @@
-
-
+import dotenv from "dotenv";
+dotenv.config();
 import { v2 as cloudinary } from "cloudinary";
 import { response } from "express";
 import fs from "fs";
 import { ApiError } from "./ApiError.js";
 
 cloudinary.config({
-  cloud_name: "gauravcodes",
-  api_key: "699786734522564",
-  api_secret: "lCd-R5fLWDWVtwcnwUbks3Y9GHY",
+  cloud_name: process.env.CLOUD_NAME,
+  api_key: process.env.API_KEY,
+  api_secret: process.env.API_SECRET,
 });
 
+console.log(`Cloud name: ${process.env.CLOUD_NAME}`);
+console.log(`API key: ${process.env.API_KEY}`);
+console.log(`API secret: ${process.env.API_SECRET}`);
 
-
-
- const uploadOnCloudinary = async(localFilePath)=>{
+const uploadOnCloudinary = async (localFilePath) => {
   try {
-    if (!localFilePath) return null
-    let respone = await cloudinary.uploader.upload(localFilePath)
-    
-    console.log("the file has been uploaded its url is : " , respone.url);
-    fs.unlinkSync(localFilePath)
-    return respone
+    if (!localFilePath) return null;
+    let respone = await cloudinary.uploader.upload(localFilePath);
+
+    console.log("the file has been uploaded its url is : ", respone.url);
+    fs.unlinkSync(localFilePath);
+    return respone;
   } catch (error) {
-    await fs.unlinkSync(localFilePath)
-    throw new ApiError(500 , "file has not been uploaded to cloudiary : " , error)
+    fs.unlinkSync(localFilePath);
+    throw new ApiError(
+      500,
+      "file has not been uploaded to cloudiary : ",
+      error
+    );
   }
-
- }
-
+};
 
 export { uploadOnCloudinary };
