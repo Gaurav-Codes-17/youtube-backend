@@ -8,8 +8,9 @@ router.route("/register").post(
     { name: "avatar", maxCount: 1 },
     { name: "coverImage", maxCount: 1 },
   ]),
-    registerUser
+  registerUser
 );
 
+// router.route("/login").post(loginUser)
 
 export default router
