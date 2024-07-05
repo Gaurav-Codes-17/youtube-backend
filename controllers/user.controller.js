@@ -3,7 +3,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { userModel } from "../models/user.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
-import { jwt } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 
 const options = {
   httpOnly: true,
@@ -208,9 +208,43 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
     );
 });
 
+const changePassword = asyncHandler(async (req, res) => {
+  const { oldPassword, confirmPassword, newPassword } = req.body;
+
+  if (!(oldPassword || newPassword || confirmPassword)) {
+    throw new ApiError(401, "all feilds are required");
+  }
+
+  if (newPassword.length < 8) {
+    throw new ApiError(400, "password must be of 8 characters");
+  }
+
+  if (newPassword !== confirmPassword) {
+    throw new ApiError(400, "password does not match!!");
+  }
+
+  const user = await userModel.findById(req.user._id);
+
+  if (!user) {
+    throw new ApiError(500, "user not found");
+  }
+
+  const isPasswordCorrect = await user.isPasswordCorrect(oldPassword);
+
+  if (!isPasswordCorrect) {
+    throw new ApiError(400, "password is not correct");
+  }
+
+  user.password = newPassword
+  await user.save({ validateBeforeSave: false });
+
+  return res.status(200).json(new ApiResponse(200 , user , "password changed successfully" ));
+});
+
 export {
-  registerUser, 
-  loginUser, 
-  logoutUser , 
-  refreshAccessToken 
+  registerUser,
+  loginUser,
+  logoutUser,
+  refreshAccessToken,
+  changePassword,
 };
