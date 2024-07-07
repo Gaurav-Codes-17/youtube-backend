@@ -86,7 +86,7 @@ const registerUser = asyncHandler(async (req, res) => {
     const newUser = await userModel.create({
       email,
       username: username.toLowerCase(),
-      fullname,
+      fullname : fullname,
       password,
       avatar: avatar.url,
       coverImage: coverImage.url,
@@ -235,10 +235,34 @@ const changePassword = asyncHandler(async (req, res) => {
     throw new ApiError(400, "password is not correct");
   }
 
-  user.password = newPassword
+  user.password = newPassword;
   await user.save({ validateBeforeSave: false });
 
-  return res.status(200).json(new ApiResponse(200 , user , "password changed successfully" ));
+  return res
+    .status(200)
+    .json(new ApiResponse(200, user, "password changed successfully"));
+});
+
+const editProfile = asyncHandler(async (req, res) => {
+  const { fullname, username, email } = req.body;
+
+if (
+  [fullname, email, username].some((field) => field?.trim() === "")
+) {
+  throw new ApiError(400, "fields cannot be empty !!");
+}
+
+
+  const user = await userModel.findById(req.user._id).select("-refreshToken -password -watchHistory -avatar -coverImage");
+
+  user.fullname = fullname;
+  user.username = username;
+  user.email = email;
+  await user.save({ validateBeforeSave: false });
+
+  return res.status(200).json(
+    new ApiResponse(200 , user , "changes have been saved !!")
+  );
 });
 
 export {
@@ -247,4 +271,5 @@ export {
   logoutUser,
   refreshAccessToken,
   changePassword,
+  editProfile,
 };

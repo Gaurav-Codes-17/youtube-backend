@@ -21,6 +21,7 @@ const userSchema = new Schema(
         },
         fullname: {
             type: String,
+            required : true
         },
         avatar: {
             type: String, // cloudinary url
