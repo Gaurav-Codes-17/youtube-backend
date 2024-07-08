@@ -1,7 +1,7 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { userModel } from "../models/user.model.js";
-import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import { uploadOnCloudinary, deleteAssets } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken";
 
@@ -27,6 +27,7 @@ const generateAccessAndRefereshTokens = async (userId) => {
     );
   }
 };
+
 
 const registerUser = asyncHandler(async (req, res) => {
   const { fullname, username, email, password } = req.body;
@@ -86,7 +87,7 @@ const registerUser = asyncHandler(async (req, res) => {
     const newUser = await userModel.create({
       email,
       username: username.toLowerCase(),
-      fullname : fullname,
+      fullname: fullname,
       password,
       avatar: avatar.url,
       coverImage: coverImage.url,
@@ -246,23 +247,87 @@ const changePassword = asyncHandler(async (req, res) => {
 const editProfile = asyncHandler(async (req, res) => {
   const { fullname, username, email } = req.body;
 
-if (
-  [fullname, email, username].some((field) => field?.trim() === "")
-) {
-  throw new ApiError(400, "fields cannot be empty !!");
-}
+  if ([fullname, email, username].some((field) => field?.trim() === "")) {
+    throw new ApiError(400, "fields cannot be empty !!");
+  }
 
-
-  const user = await userModel.findById(req.user._id).select("-refreshToken -password -watchHistory -avatar -coverImage");
+  const user = await userModel
+    .findById(req.user._id)
+    .select("-refreshToken -password -watchHistory -avatar -coverImage");
 
   user.fullname = fullname;
   user.username = username;
   user.email = email;
   await user.save({ validateBeforeSave: false });
 
-  return res.status(200).json(
-    new ApiResponse(200 , user , "changes have been saved !!")
+  return res
+    .status(200)
+    .json(new ApiResponse(200, user, "changes have been saved !!"));
+});
+
+const avatarChange = asyncHandler(async (req, res) => {
+  const avatarLocalPath = req.file?.path;
+  if (!avatarLocalPath) {
+    throw new ApiError(400, "avatar file is missing");
+  }
+
+  const avatar = await uploadOnCloudinary(avatarLocalPath);
+
+  if (!avatar.url) {
+    throw new ApiError(400, "Error while uploading avatar");
+  }
+
+
+  const oldUser = await userModel.findById(req.user._id)
+  await deleteAssets(oldUser.avatar)
+  await oldUser.save({validateBeforeSave : false})
+  const newUser = await userModel.findOneAndUpdate(
+    req.user._id,
+    {
+      $set: {
+        avatar: avatar.url,
+      },
+    },
+    { new: true }
   );
+
+  
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(200, newUser, "avatar has been sucessfully changed ")
+    );
+});
+
+const updateUserCoverImage = asyncHandler(async (req, res) => {
+  const coverImageLocalPath = req.file?.path;
+  if (!coverImageLocalPath) {
+    throw new ApiError(400, "cover image file is missing");
+  }
+
+  const coverImage = await uploadOnCloudinary(coverImageLocalPath);
+  if (!coverImage.url) {
+    throw new ApiError(400, "Error while uploading cover image");
+  }
+
+  const oldUser = await userModel.findById(req.user._id);
+  await deleteAssets(oldUser.coverImage);
+  await oldUser.save({ validateBeforeSave: false });
+
+  const user = await userModel.findOneAndUpdate(
+    req.user._id,
+    {
+      $set: {
+        coverImage: coverImage.url,
+      },
+    },
+    { new: true }
+  );
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, user, "avatar has been sucessfully changed "));
 });
 
 export {
@@ -272,4 +337,6 @@ export {
   refreshAccessToken,
   changePassword,
   editProfile,
+  avatarChange,
+  updateUserCoverImage,
 };

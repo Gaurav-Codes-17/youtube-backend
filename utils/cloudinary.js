@@ -4,6 +4,7 @@ import { v2 as cloudinary } from "cloudinary";
 import { response } from "express";
 import fs from "fs";
 import { ApiError } from "./ApiError.js";
+import { userModel } from "../models/user.model.js";
 
 cloudinary.config({
   cloud_name: process.env.CLOUD_NAME,
@@ -29,4 +30,30 @@ const uploadOnCloudinary = async (localFilePath) => {
   }
 };
 
-export { uploadOnCloudinary };
+
+const getPublicIdFromUrl = (url)=>{
+
+  const imageArray = url.split("/")
+  const imageName  = imageArray[imageArray.length-1]
+  const imageId = imageName.split(".")[0]
+return imageId
+}
+
+
+const deleteAssets = async(oldImagePath) =>{
+
+  try {
+      
+    const public_id =  getPublicIdFromUrl(oldImagePath)
+    
+    let result = await cloudinary.uploader.destroy(public_id)
+    
+    return result
+
+  } catch (error) {
+    throw new ApiError(500 , "file is not deleted : " , error)
+  }
+
+}
+
+export { uploadOnCloudinary  , deleteAssets};
