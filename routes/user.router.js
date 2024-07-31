@@ -3,6 +3,9 @@ import {
   avatarChange,
   changePassword,
   editProfile,
+  gettingAllUsersDatabase,
+  getUserChannelProfile,
+  getWatchHistory,
   loginUser,
   logoutUser,
   refreshAccessToken,
@@ -45,6 +48,12 @@ router.route("/updateCoverImage")
           .post(verifyJWT, upload.single("coverImage"), updateUserCoverImage);
 
 //All users endpoint
-router.route("/allUsersDatabase").post()
+router.route("/allUsersDatabase").get(verifyJWT , gettingAllUsersDatabase )
+
+//getting user channel profile
+router.route("/c/:username").get(verifyJWT , getUserChannelProfile)
+
+//getting user's watch history
+router.route("/watch-history").get(verifyJWT, getWatchHistory)
 
 export default router;
