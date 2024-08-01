@@ -51,7 +51,7 @@ router.route("/updateCoverImage")
 router.route("/allUsersDatabase").get(verifyJWT , gettingAllUsersDatabase )
 
 //getting user channel profile
-router.route("/c/:username").get(verifyJWT , getUserChannelProfile)
+router.route("/c/:username").get( verifyJWT,getUserChannelProfile)
 
 //getting user's watch history
 router.route("/watch-history").get(verifyJWT, getWatchHistory)

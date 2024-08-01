@@ -9,7 +9,7 @@ const videoSchema  = mongoose.Schema({
     views : Number,
     isPublished : Boolean,
     owner : {
-        type : mongoose.Schema.Types.ObjectId,
+        type :  mongoose.Schema.Types.ObjectId,
         ref : "user"
     }
 }, 
