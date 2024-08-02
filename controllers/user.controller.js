@@ -80,8 +80,7 @@ const registerUser = asyncHandler(async (req, res) => {
       throw new ApiError(400, "Failed to upload avatar");
     }
 
-    console.log("Avatar URL:", avatar.url);
-    console.log("Cover Image URL:", coverImage?.url);
+  
 
     // Create new user
     const newUser = await userModel.create({

@@ -7,15 +7,15 @@ import {
     togglePublishStatus,
     updateVideo,
 } from "../controllers/video.controller.js"
-import {verifyJWT} from "../chai-backend/src/middlewares/auth.middleware.js"
-import {upload} from "../chai-backend/src/middlewares/multer.middleware.js"
+import {verifyJWT} from "../middlewares/auth.middleware.js"
+import {upload} from "../middlewares/multer.middleware.js"
 
 const router = Router();
 router.use(verifyJWT); // Apply verifyJWT middleware to all routes in this file
 
 router
     .route("/")
-    .get(getAllVideos)
+    // .get(getAllVideos)
     .post(
         upload.fields([
             {

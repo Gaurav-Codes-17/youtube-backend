@@ -12,16 +12,19 @@ cloudinary.config({
   api_secret: process.env.API_SECRET,
 });
 
-const uploadOnCloudinary = async (localFilePath) => {
+const uploadOnCloudinary = async (localFilePath , resourceType) => {
   try {
     if (!localFilePath) return null;
-    let respone = await cloudinary.uploader.upload(localFilePath);
+    let respone = await cloudinary.uploader.upload(
+      localFilePath,
+      {resource_type : resourceType}
+    );
 
-    console.log("the file has been uploaded its url is : ", respone.url);
-    fs.unlinkSync(localFilePath);
+    fs.unlinkSync(localFilePath, { resource_type: resourceType });
     return respone;
   } catch (error) {
-    fs.unlinkSync(localFilePath);
+    console.log(error);
+    fs.unlinkSync(localFilePath , {resource_type : resourceType});
     throw new ApiError(
       500,
       "file has not been uploaded to cloudiary : ",
