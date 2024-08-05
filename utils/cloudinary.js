@@ -43,13 +43,13 @@ return imageId
 }
 
 
-const deleteAssets = async(oldImagePath) =>{
+const deleteAssets = async(oldImagePath , resourceType) =>{
 
   try {
       
     const public_id =  getPublicIdFromUrl(oldImagePath)
     
-    let result = await cloudinary.uploader.destroy(public_id)
+    let result = await cloudinary.uploader.destroy(public_id, { resource_type: resourceType })
     
     return result
 
