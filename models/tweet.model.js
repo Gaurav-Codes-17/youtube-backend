@@ -7,9 +7,9 @@ const tweetSchema = new Schema({
     },
     owner: {
         type: Schema.Types.ObjectId,
-        ref: "User"
+        ref: "user"
     }
 }, {timestamps: true})
 
 
-export const Tweet = mongoose.model("Tweet", tweetSchema)
+export const tweetModel = mongoose.model("tweet", tweetSchema)

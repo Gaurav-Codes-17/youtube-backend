@@ -10,24 +10,34 @@ const getAllVideos = asyncHandler(async (req, res) => {
   let { page = 1, limit = 10, q, sortBy, sortType, _id } = req.query;
   //TODO: get all videos based on query, sort, pagination
 
+  
+
+
   let sortCriteria = {};
   if (sortBy) {
     sortCriteria[sortBy] = sortType === "desc" ? -1 : 1;
   }
 
   let searchCriteria = {isPublished : true};
-
   if (q) {
     let queryRegex = new RegExp(q, "i");
 
     searchCriteria = {
-      $or: [{ title: queryRegex }, { description: queryRegex }],
+      $or: [{ title: queryRegex }, { description: queryRegex } 
+      ],
     };
     sortCriteria[q];
   }
+ if (_id) {
+   if (!isValidObjectId(_id)) {
+     throw new ApiError(400, "Invalid ID");
+   }
+   searchCriteria = { ...searchCriteria, owner: _id };
+ }
+
 
   const allVideos = await videoModel
-    .find(searchCriteria)
+  .find(searchCriteria)
     .populate("owner")
     .select("-password -__v -createdAt -updatedAt  -email ")
     .sort(sortCriteria)
@@ -84,9 +94,8 @@ const publishAVideo = asyncHandler(async (req, res) => {
     isPublished: true,
     owner,
     views: 0,
-  });
+  })
 
-  console.log(user.watchHistory);
   const watchedVid = user.watchHistory;
   let views = 0;
 
@@ -104,7 +113,7 @@ const publishAVideo = asyncHandler(async (req, res) => {
   videoFile.views = views;
   await videoFile.save();
 
-  const publishedVid = await videoModel.findById(videoFile._id);
+  const publishedVid = await videoModel.findById(videoFile._id).populate("owner");
 
   if (!videoFile) {
     throw new ApiError(400, "video is not created");
