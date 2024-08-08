@@ -46,10 +46,13 @@ const addComment = asyncHandler(async (req, res) => {
     const {content} = req.body
 
     if (videoId && !isValidObjectId(videoId)) {
-        throw new ApiError(404 , "video not found")
+        throw new ApiError(404 , "video id is not valid")
     }
 
     const video = await videoModel.findById(videoId).populate("owner")
+    if (!video) {
+        throw new ApiError(404 , "video not found")
+    }
 
     if (!content) {
         throw new ApiError(400 , "comment field cannot be empty!")
