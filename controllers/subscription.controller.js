@@ -1,6 +1,5 @@
 import mongoose, {isValidObjectId} from "mongoose"
 import {userModel} from "../models/user.model.js"
-import {videoModel} from "../models/video.model.js"
 import { subscriptionModel } from "../models/subscription.model.js"
 import {asyncHandler} from "../utils/asyncHandler.js"
 import { ApiError } from "../utils/ApiError.js"
